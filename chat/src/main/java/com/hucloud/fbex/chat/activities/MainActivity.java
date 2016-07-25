@@ -51,60 +51,67 @@ public class MainActivity extends AppCompatActivity {
         db();
     }
 
+    @Override
+    protected void onStop() {
+        mDbRef.removeEventListener(mDBListener);
+    }
+
     private void db() {
         mDbRef = mDb.getReference("messages");
-
-        mDbRef.addChildEventListener(new ChildEventListener() {
-
-            // Firebase DataAdd 시 호출(RealTime)
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.i(TAG, "LoginActivity.onComplete");
-                Map<String, Object> messageMap = (Map)dataSnapshot.getValue();
-                if ( messageMap == null ) {
-                    return;
-                }
-                String sender = messageMap.get("senderId").toString();
-                String senderNm = messageMap.get("senderEmail").toString();
-                String msg = messageMap.get("message").toString();
-                if ( sender.equals(mUser.getUid())) {
-                    addMeArea(messageMap);
-                } else {
-                    addUArea(messageMap);
-                }
-                scrollToEnd();
-            }
-
-            // Firebase Data내용 변경 시 호출(RealTime)
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                System.out.println( "onChildChangeds!!!!");
-                if ( s != null ) {
-                    System.out.println( s );
-                }
-                Toast.makeText(getApplication(), "dataChanged", Toast.LENGTH_LONG).show();
-                scrollToEnd();
-            }
-
-            // Firebase Data 삭제 시 호출(RealTime)
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                System.out.println( "onChildRemoved!!!!");
-                Toast.makeText(getApplication(), "dataremoved!!!!", Toast.LENGTH_LONG).show();
-
-                System.out.println( dataSnapshot.getKey() + " [ " + dataSnapshot.getValue() + " ] ");
-            }
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        mDbRef.addChildEventListener(mDBListener);
     }
+
+
+    private ChildEventListener mDBListener = new ChildEventListener() {
+
+        // Firebase DataAdd 시 호출(RealTime)
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            Log.i(TAG, "LoginActivity.onComplete");
+            Map<String, Object> messageMap = (Map)dataSnapshot.getValue();
+            if ( messageMap == null ) {
+                return;
+            }
+            String sender = messageMap.get("senderId").toString();
+            String senderNm = messageMap.get("senderEmail").toString();
+            String msg = messageMap.get("message").toString();
+            if ( sender.equals(mUser.getUid())) {
+                addMeArea(messageMap);
+            } else {
+                addUArea(messageMap);
+            }
+            scrollToEnd();
+        }
+
+        // Firebase Data내용 변경 시 호출(RealTime)
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            System.out.println( "onChildChangeds!!!!");
+            if ( s != null ) {
+                System.out.println( s );
+            }
+            Toast.makeText(getApplication(), "dataChanged", Toast.LENGTH_LONG).show();
+            scrollToEnd();
+        }
+
+        // Firebase Data 삭제 시 호출(RealTime)
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            System.out.println( "onChildRemoved!!!!");
+            Toast.makeText(getApplication(), "dataremoved!!!!", Toast.LENGTH_LONG).show();
+
+            System.out.println( dataSnapshot.getKey() + " [ " + dataSnapshot.getValue() + " ] ");
+        }
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     //메세지 발송
     public void sendMessage(View view) {
